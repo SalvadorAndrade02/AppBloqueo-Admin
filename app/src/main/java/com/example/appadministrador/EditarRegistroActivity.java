@@ -1,12 +1,14 @@
 package com.example.appadministrador;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,19 +18,27 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class EditarRegistroActivity extends AppCompatActivity {
 
-    EditText etIMEI, etPrecio, etNombre, etDomicilio, etEdad, etPeriodo, etPagoSemanal, etSemanasTotales, etMonto;
+    EditText etIMEI, etPrecio, etNombre, etDomicilio, etEdad, etPagoSemanal, etMonto;
     Button btnGuardar;
+    TextView tvSemanasTotal;
+    TextInputEditText etFechaInicio, etFechaFin;
     Spinner spinnerMarca;
     String[] opcionesMarca = {"Samsung", "Motorola"};
     DatabaseReference databaseReference;
@@ -46,9 +56,10 @@ public class EditarRegistroActivity extends AppCompatActivity {
         etNombre = findViewById(R.id.etEditarNombre);
         etDomicilio = findViewById(R.id.etEditarDomicilio);
         etEdad = findViewById(R.id.etEditarEdad);
-        etPeriodo = findViewById(R.id.etEditarPeriodo);
+        etFechaInicio = findViewById(R.id.etFechaInicio);
+        etFechaFin = findViewById(R.id.etFechaFin);
         etPagoSemanal = findViewById(R.id.etEditarPagoSemanal);
-        etSemanasTotales = findViewById(R.id.etEditarSemanasTotales);
+        tvSemanasTotal = findViewById(R.id.tvTotalSemanas);
         etMonto = findViewById(R.id.etEditarMonto);
         btnGuardar = findViewById(R.id.btnGuardarEdicion);
 
@@ -75,9 +86,10 @@ public class EditarRegistroActivity extends AppCompatActivity {
         String nombre = getIntent().getStringExtra("nombreCliente");
         String domicilio = getIntent().getStringExtra("domicilio");
         String edad = getIntent().getStringExtra("edad");
-        String periodo = getIntent().getStringExtra("PeriodoPago");
+        String fechaIni = getIntent().getStringExtra("fechaInicio");
+        String fechaFin = getIntent().getStringExtra("fechaFin");
         String pagoseman = getIntent().getStringExtra("PagoSemanal");
-        String semantotal = getIntent().getStringExtra("SemanasTotales");
+        int totalSemanas = getIntent().getIntExtra("totalSemanas", 0);
         String monto = getIntent().getStringExtra("MontoTotal");
 
         // Mostrar datos en los EditText
@@ -87,14 +99,46 @@ public class EditarRegistroActivity extends AppCompatActivity {
         etNombre.setText(nombre);
         etDomicilio.setText(domicilio);
         etEdad.setText(edad);
-        etPeriodo.setText(periodo);
+        etFechaInicio.setText(fechaIni);
+        etFechaFin.setText(fechaFin);
         etPagoSemanal.setText(pagoseman);
-        etSemanasTotales.setText(semantotal);
+        tvSemanasTotal.setText(String.valueOf(totalSemanas));
         etMonto.setText(monto);
 
         btnGuardar.setOnClickListener(v -> guardarCambios());
-
+        etFechaInicio.setOnClickListener(v -> seleccionarFecha(etFechaInicio, true));
+        etFechaFin.setOnClickListener(v -> seleccionarFecha(etFechaFin, false));
     }
+
+    private void seleccionarFecha(TextInputEditText editText, boolean esInicio) {
+        Calendar fecha = Calendar.getInstance();
+        DatePickerDialog datePicker = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            fecha.set(year, month, dayOfMonth);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            editText.setText(sdf.format(fecha.getTime()));
+
+            if (!etFechaInicio.getText().toString().isEmpty() && !etFechaFin.getText().toString().isEmpty()) {
+                calcularSemanas();
+            }
+        }, fecha.get(Calendar.YEAR), fecha.get(Calendar.MONTH), fecha.get(Calendar.DAY_OF_MONTH));
+        datePicker.show();
+    }
+
+    // Método para calcular semanas
+    private void calcularSemanas() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        try {
+            Date inicio = sdf.parse(etFechaInicio.getText().toString());
+            Date fin = sdf.parse(etFechaFin.getText().toString());
+
+            long diferencia = fin.getTime() - inicio.getTime();
+            int semanas = (int) (diferencia / (1000 * 60 * 60 * 24 * 7));
+            tvSemanasTotal.setText(String.valueOf(semanas));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void guardarCambios() {
         String dispositivoId  = getIntent().getStringExtra("id");
         if (dispositivoId == null || dispositivoId.isEmpty()) {
@@ -108,9 +152,10 @@ public class EditarRegistroActivity extends AppCompatActivity {
         String nuevoNombre = etNombre.getText().toString();
         String nuevoDomicilio = etDomicilio.getText().toString();
         String nuevoEdad = etEdad.getText().toString();
-        String nuevoPeriodo = etPeriodo.getText().toString();
+        String nuevoFechaIni = etFechaInicio.getText().toString();
+        String nuevoFechaFin = etFechaFin.getText().toString();
         String nuevoPagoseman = etPagoSemanal.getText().toString();
-        String nuevoSemantotal = etSemanasTotales.getText().toString();
+        int nuevasSemanasTotal = Integer.parseInt(tvSemanasTotal.getText().toString());
         String nuevoMonto = etMonto.getText().toString();
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("DatosDispositivos").child(dispositivoId);
@@ -120,8 +165,8 @@ public class EditarRegistroActivity extends AppCompatActivity {
         }
 
         if (!nuevoImei.isEmpty() && !nuevoMarca.isEmpty() && !nuevoPrecio.isEmpty() && !nuevoNombre.isEmpty() &&
-                !nuevoDomicilio.isEmpty() && !nuevoEdad.isEmpty() && !nuevoPeriodo.isEmpty() &&
-                !nuevoPagoseman.isEmpty() && !nuevoSemantotal.isEmpty() && !nuevoMonto.isEmpty()) {
+                !nuevoDomicilio.isEmpty() && !nuevoEdad.isEmpty() && !nuevoFechaIni.isEmpty() &&
+                !nuevoPagoseman.isEmpty() && !nuevoFechaFin.isEmpty() && !nuevoMonto.isEmpty()) {
 
             // Mantener el userId al actualizar los datos
             databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -137,9 +182,10 @@ public class EditarRegistroActivity extends AppCompatActivity {
                         datosActualizados.put("nombreCliente", nuevoNombre);
                         datosActualizados.put("domicilio", nuevoDomicilio);
                         datosActualizados.put("edad", nuevoEdad);
-                        datosActualizados.put("periodoPago", nuevoPeriodo);
+                        datosActualizados.put("fechaInicio", nuevoFechaIni);
+                        datosActualizados.put("fechaFin", nuevoFechaFin);
                         datosActualizados.put("pagoSemanal", nuevoPagoseman);
-                        datosActualizados.put("semanasTotal", nuevoSemantotal);
+                        datosActualizados.put("totalSemanas", nuevasSemanasTotal);
                         datosActualizados.put("montoTotal", nuevoMonto);
                         datosActualizados.put("userId", userId); // Asegurar que no se pierda el userId
 

@@ -1,5 +1,6 @@
 package com.example.appadministrador;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,8 +12,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,14 +23,25 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link AgregarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class AgregarFragment extends Fragment {
-    EditText etIMEI, etPrecio, etNombreCliente, etDomicilio, etEdad, etPeriodo, etPagoSemanal, etSemanasTotal, etMontoTotal;
+    EditText etIMEI, etPrecio, etNombreCliente, etDomicilio, etEdad, etPagoSemanal, etMontoTotal;
     Button btnGuardar;
+    private TextInputEditText etFechaInicio, etFechaFin;
+    private TextView tvTotalSemanas;
+    private Calendar fechaInicio, fechaFin;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     Spinner spinnerMarca;
     DatabaseReference databaseReference;
 
@@ -90,9 +104,16 @@ public class AgregarFragment extends Fragment {
         etNombreCliente = view.findViewById(R.id.etNombreCliente);
         etDomicilio = view.findViewById(R.id.etDomicilio);
         etEdad = view.findViewById(R.id.etEdad);
-        etPeriodo = view.findViewById(R.id.etPeriodo);
         etPagoSemanal = view.findViewById(R.id.etPagoSemanal);
-        etSemanasTotal = view.findViewById(R.id.etSemanasTotal);
+        etFechaInicio = view.findViewById(R.id.etFechaInicio);
+        etFechaFin = view.findViewById(R.id.etFechaFin);
+        tvTotalSemanas = view.findViewById(R.id.tvTotalSemanas);
+
+        fechaInicio = Calendar.getInstance();
+        fechaFin = Calendar.getInstance();
+
+        etFechaInicio.setOnClickListener (v-> seleccionarFecha(etFechaInicio, fechaInicio, true));
+        etFechaFin.setOnClickListener(v -> seleccionarFecha(etFechaFin, fechaFin, false));
         etMontoTotal = view.findViewById(R.id.etMontoTotal);
 
         btnGuardar = view.findViewById(R.id.btnGuardar);
@@ -104,6 +125,44 @@ public class AgregarFragment extends Fragment {
         return view;
     }
 
+    private void seleccionarFecha(TextInputEditText editText, Calendar fecha, boolean esInicio) {
+        DatePickerDialog datePicker = new DatePickerDialog(requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    fecha.set(year, month, dayOfMonth);
+                    editText.setText(dateFormat.format(fecha.getTime()));
+
+                    if (!esInicio && !etFechaInicio.getText().toString().isEmpty()) {
+                        // Cuando se seleccione la fecha de fin, calculamos las semanas
+                        calcularSemanas();
+                    }
+                },
+                fecha.get(Calendar.YEAR), fecha.get(Calendar.MONTH), fecha.get(Calendar.DAY_OF_MONTH));
+        datePicker.show();
+    }
+
+    private void calcularSemanas() {
+        String fechaInicioStr = etFechaInicio.getText().toString();
+        String fechaFinStr = etFechaFin.getText().toString();
+
+        if (!fechaInicioStr.isEmpty() && !fechaFinStr.isEmpty()) {
+            try {
+                Date fechaInicio = dateFormat.parse(fechaInicioStr);
+                Date fechaFin = dateFormat.parse(fechaFinStr);
+
+                int totalSemanas = calcularSemanas(fechaInicio, fechaFin);
+                tvTotalSemanas.setText(String.valueOf(totalSemanas));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private int calcularSemanas(Date inicio, Date fin) {
+        long diferencia = fin.getTime() - inicio.getTime();
+        return (int) (diferencia / (1000 * 60 * 60 * 24 * 7)); // Convertir milisegundos a semanas
+    }
+
+
     private void guardarDatos() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String userId = auth.getCurrentUser().getUid();
@@ -114,18 +173,20 @@ public class AgregarFragment extends Fragment {
         String nombreCliente = etNombreCliente.getText().toString();
         String domicilio = etDomicilio.getText().toString();
         String edad = etEdad.getText().toString();
-        String periodoPago = etPeriodo.getText().toString();
+        String fechaInicio = etFechaInicio.getText().toString();
+        String fechaFin = etFechaFin.getText().toString();
         String pagoSemanal = etPagoSemanal.getText().toString();
-        String semanasTotal = etSemanasTotal.getText().toString();
+        // Obtén las semanas calculadas
+        int totalSemanas = Integer.parseInt(tvTotalSemanas.getText().toString()); // Convertir el texto a int
         String montoTotal = etMontoTotal.getText().toString();
 
         if (!esIMEIValido(IMEI)) {
             Toast.makeText(requireContext(), "El IMEI debe tener 15 dígitos numéricos", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!marcaTelefono.isEmpty() && !Precio.isEmpty() && !nombreCliente.isEmpty() && !domicilio.isEmpty() && !edad.isEmpty() && !periodoPago.isEmpty() && !pagoSemanal.isEmpty() && !semanasTotal.isEmpty() && !montoTotal.isEmpty()) {
+        if (!marcaTelefono.isEmpty() && !Precio.isEmpty() && !nombreCliente.isEmpty() && !domicilio.isEmpty() && !edad.isEmpty() && !fechaInicio.isEmpty() && !pagoSemanal.isEmpty() && !montoTotal.isEmpty()) {
             String id = databaseReference.push().getKey();
-            DispositivosRegistrados dispositivos = new DispositivosRegistrados(id, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad, periodoPago, pagoSemanal, semanasTotal, montoTotal, "activo");
+            DispositivosRegistrados dispositivos = new DispositivosRegistrados(id, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad, fechaInicio,fechaFin, pagoSemanal, montoTotal, "activo", totalSemanas);
             databaseReference.child(id).setValue(dispositivos);
 
             // Mostrar un mensaje de éxito
@@ -137,9 +198,10 @@ public class AgregarFragment extends Fragment {
             etNombreCliente.setText("");
             etDomicilio.setText("");
             etEdad.setText("");
-            etPeriodo.setText("");
+            etFechaInicio.setText("");
+            etFechaFin.setText("");
             etPagoSemanal.setText("");
-            etSemanasTotal.setText("");
+            tvTotalSemanas.setText("");  // Limpiar el campo de semanas
             etMontoTotal.setText("");
 
             // Volver al fragmento de inicio con commit()
@@ -150,6 +212,8 @@ public class AgregarFragment extends Fragment {
             Toast.makeText(getActivity(), "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
     private boolean esIMEIValido(String imei) {
         return imei.matches("\\d{15}");

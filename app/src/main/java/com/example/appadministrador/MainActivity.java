@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment = new InicioFragment();
             } else if (itemId == R.id.nav_agregar) {
                 selectedFragment = new AgregarFragment();
+            } else if (itemId == R.id.nav_perfil){
+                selectedFragment = new PerfilFragment();
             }
 
             if (selectedFragment != null) {

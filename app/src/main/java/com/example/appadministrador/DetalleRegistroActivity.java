@@ -23,7 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class DetalleRegistroActivity extends AppCompatActivity {
-    TextView tvIMEI,tvMarca, tvPrecio, tvNombreCliente, tvDomicilio, tvEdad, tvPeriodo, tvPagoSemanal, tvSemanasTotal, tvMontoTotal;
+    TextView tvIMEI,tvMarca, tvPrecio, tvNombreCliente, tvDomicilio, tvEdad, tvFechaInicio,tvFechaFin, tvPagoSemanal, tvSemanasTotal, tvMontoTotal;
     Button btnCerrar;
     private DatabaseReference databaseReference;
     private Button btnBloquear, btnDesbloquear;
@@ -41,7 +41,8 @@ public class DetalleRegistroActivity extends AppCompatActivity {
         tvNombreCliente = findViewById(R.id.tvNombreCliente);
         tvDomicilio = findViewById(R.id.tvDomicilio);
         tvEdad = findViewById(R.id.tvEdad);
-        tvPeriodo = findViewById(R.id.tvPeriodo);
+        tvFechaInicio = findViewById(R.id.tvFechaInicio);
+        tvFechaFin = findViewById(R.id.tvFechaFin);
         tvPagoSemanal = findViewById(R.id.tvPagoSemanal);
         tvSemanasTotal = findViewById(R.id.tvSemanasTotal);
         tvMontoTotal = findViewById(R.id.tvMontoTotal);
@@ -81,12 +82,14 @@ public class DetalleRegistroActivity extends AppCompatActivity {
             tvDomicilio.setText("Domicilio: " + domic);
             String ed = intent.getStringExtra("edad");
             tvEdad.setText("Edad: " + ed);
-            String peri = intent.getStringExtra("periodoPago");
-            tvPeriodo.setText("Periodo de Pago: " + peri);
+            String fechaIni = intent.getStringExtra("fechaInicio");
+            tvFechaInicio.setText("Periodo Fecha Inicio: " + fechaIni);
+            String fechaFin = intent.getStringExtra("fechaFin");
+            tvFechaFin.setText("Periodo Fecha Final: " + fechaFin);
             String pagoSem = intent.getStringExtra("pagoSemanal");
             tvPagoSemanal.setText("Pago Semanal: " + pagoSem);
-            String semTotal = intent.getStringExtra("semanasTotal");
-            tvSemanasTotal.setText("Semanas Totales: " + semTotal);
+            int semTotal = intent.getIntExtra("totalSemanas", 0);
+            tvSemanasTotal.setText(String.valueOf("Semanas Totales: " + semTotal));
             String monto = intent.getStringExtra("montoTotal");
             tvMontoTotal.setText("Monto Total: " + monto);
 
@@ -100,9 +103,10 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                 intent1.putExtra("nombreCliente", nom);
                 intent1.putExtra("domicilio", domic);
                 intent1.putExtra("edad", ed);
-                intent1.putExtra("PeriodoPago", peri);
+                intent1.putExtra("fechaInicio", fechaIni);
+                intent1.putExtra("fechaFin", fechaFin);
                 intent1.putExtra("PagoSemanal", pagoSem);
-                intent1.putExtra("SemanasTotales", semTotal);
+                intent1.putExtra("totalSemanas", semTotal);
                 intent1.putExtra("MontoTotal", monto);
                 startActivity(intent1);
             });
@@ -132,9 +136,10 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                     String nombre = snapshot.child("nombreCliente").getValue(String.class);
                     String domicilio = snapshot.child("domicilio").getValue(String.class);
                     String edad = snapshot.child("edad").getValue(String.class);
-                    String periodoPago = snapshot.child("periodoPago").getValue(String.class);
+                    String fechaInicio = snapshot.child("fechaInicio").getValue(String.class);
+                    String fechaFin = snapshot.child("fechaFin").getValue(String.class);
                     String pagoSemanal = snapshot.child("pagoSemanal").getValue(String.class);
-                    String semanasTotal = snapshot.child("semanasTotal").getValue(String.class);
+                    int semanasTotal = snapshot.child("totalSemanas").getValue(int.class);
                     String montoTotal = snapshot.child("montoTotal").getValue(String.class);
 
                     // Actualizar las vistas con los datos obtenidos
@@ -144,7 +149,8 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                     tvNombreCliente.setText("Nombre del Cliente: " + nombre);
                     tvDomicilio.setText("Domicilio: " + domicilio);
                     tvEdad.setText("Edad: " + edad);
-                    tvPeriodo.setText("Periodo de Pago: " + periodoPago);
+                    tvFechaInicio.setText("Periodo Fecha Inicio: " + fechaInicio);
+                    tvFechaFin.setText("Periodo Fecha Final: " + fechaFin);
                     tvPagoSemanal.setText("Pago Semanal: " + pagoSemanal);
                     tvSemanasTotal.setText("Semanas Totales: " + semanasTotal);
                     tvMontoTotal.setText("Monto Total: " + montoTotal);

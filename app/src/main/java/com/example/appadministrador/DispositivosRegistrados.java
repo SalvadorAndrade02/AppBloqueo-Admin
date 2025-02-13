@@ -2,31 +2,14 @@ package com.example.appadministrador;
 
 public class DispositivosRegistrados {
     //Datos del telefono
-    private String dispositivoId;
-    private String userId;
-    private String IMEI;
-    private String marcaTelefono;
-    private String Precio;
-
-    //---Datos del cliente---
-    private String nombreCliente;
-    private String domicilio;
-    private String edad;
-
-    //---Datos de pago---
-
-    private String periodoPago;
-    private String pagoSemanal;
-    private String semanasTotal;
-    private String montoTotal;
-
-    //---Estado---
-    private String estado;
+    private String dispositivoId, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad;
+    private String fechaInicio, fechaFin, pagoSemanal, montoTotal, estado;
+    private int totalSemanas;
 
     public DispositivosRegistrados() {
     }
 
-    public DispositivosRegistrados(String dispositivoId, String userId, String IMEI, String marcaTelefono, String precio, String nombreCliente, String domicilio, String edad, String periodoPago, String pagoSemanal, String semanasTotal, String montoTotal, String estado) {
+    public DispositivosRegistrados(String dispositivoId, String userId, String IMEI, String marcaTelefono, String precio, String nombreCliente, String domicilio, String edad, String fechaInicio, String fechaFin, String pagoSemanal, String montoTotal, String estado, int totalSemanas) {
         this.dispositivoId = dispositivoId;
         this.userId = userId;
         this.IMEI = IMEI;
@@ -35,11 +18,20 @@ public class DispositivosRegistrados {
         this.nombreCliente = nombreCliente;
         this.domicilio = domicilio;
         this.edad = edad;
-        this.periodoPago = periodoPago;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
         this.pagoSemanal = pagoSemanal;
-        this.semanasTotal = semanasTotal;
         this.montoTotal = montoTotal;
         this.estado = estado;
+        this.totalSemanas = totalSemanas;
+    }
+
+    public String getDispositivoId() {
+        return dispositivoId;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getIMEI() {
@@ -66,16 +58,16 @@ public class DispositivosRegistrados {
         return edad;
     }
 
-    public String getPeriodoPago() {
-        return periodoPago;
+    public String getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public String getFechaFin() {
+        return fechaFin;
     }
 
     public String getPagoSemanal() {
         return pagoSemanal;
-    }
-
-    public String getSemanasTotal() {
-        return semanasTotal;
     }
 
     public String getMontoTotal() {
@@ -84,6 +76,18 @@ public class DispositivosRegistrados {
 
     public String getEstado() {
         return estado;
+    }
+
+    public int getTotalSemanas() {
+        return totalSemanas;
+    }
+
+    public void setDispositivoId(String dispositivoId) {
+        this.dispositivoId = dispositivoId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setIMEI(String IMEI) {
@@ -110,16 +114,16 @@ public class DispositivosRegistrados {
         this.edad = edad;
     }
 
-    public void setPeriodoPago(String periodoPago) {
-        this.periodoPago = periodoPago;
+    public void setFechaInicio(String fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public void setFechaFin(String fechaFin) {
+        this.fechaFin = fechaFin;
     }
 
     public void setPagoSemanal(String pagoSemanal) {
         this.pagoSemanal = pagoSemanal;
-    }
-
-    public void setSemanasTotal(String semanasTotal) {
-        this.semanasTotal = semanasTotal;
     }
 
     public void setMontoTotal(String montoTotal) {
@@ -130,20 +134,8 @@ public class DispositivosRegistrados {
         this.estado = estado;
     }
 
-    public String getDispositivoId() {
-        return dispositivoId;
-    }
-
-    public void setDispositivoId(String dispositivoId) {
-        this.dispositivoId = dispositivoId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setTotalSemanas(int totalSemanas) {
+        this.totalSemanas = totalSemanas;
     }
 }
 

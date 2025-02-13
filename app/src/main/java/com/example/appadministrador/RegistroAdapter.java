@@ -49,9 +49,10 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.ViewHo
                 intent.putExtra("nombreCliente", registro.getNombreCliente());
                 intent.putExtra("domicilio", registro.getDomicilio());
                 intent.putExtra("edad", registro.getEdad());
-                intent.putExtra("periodoPago", registro.getPeriodoPago());
+                intent.putExtra("fechaInicio", registro.getFechaInicio());
+                intent.putExtra("fechaFin", registro.getFechaFin());
                 intent.putExtra("pagoSemanal", registro.getPagoSemanal());
-                intent.putExtra("semanasTotal", registro.getSemanasTotal());
+                intent.putExtra("totalSemanas", registro.getTotalSemanas());
                 intent.putExtra("montoTotal", registro.getMontoTotal());
                 intent.putExtra("id", registro.getDispositivoId());
                 context.startActivity(intent);
