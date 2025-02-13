@@ -46,6 +46,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.ViewHo
                 intent.putExtra("IMEI", registro.getIMEI());
                 intent.putExtra("marcaTelefono", registro.getMarcaTelefono());
                 intent.putExtra("Precio", registro.getPrecio());
+                intent.putExtra("porcentajeInteres: ", registro.getPorcentajeInteres());
                 intent.putExtra("nombreCliente", registro.getNombreCliente());
                 intent.putExtra("domicilio", registro.getDomicilio());
                 intent.putExtra("edad", registro.getEdad());

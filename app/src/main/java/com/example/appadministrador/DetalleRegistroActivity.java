@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 public class DetalleRegistroActivity extends AppCompatActivity {
     TextView tvIMEI,tvMarca, tvPrecio, tvNombreCliente, tvDomicilio, tvEdad, tvFechaInicio,tvFechaFin, tvPagoSemanal, tvSemanasTotal, tvMontoTotal;
     Button btnCerrar;
+    TextView tvInteres;
     private DatabaseReference databaseReference;
     private Button btnBloquear, btnDesbloquear;
     private String dispositivoId;
@@ -38,6 +40,7 @@ public class DetalleRegistroActivity extends AppCompatActivity {
         tvIMEI = findViewById(R.id.tvIMEI);
         tvMarca = findViewById(R.id.tvMarca);
         tvPrecio = findViewById(R.id.tvPrecio);
+        tvInteres = findViewById(R.id.tvInteres);
         tvNombreCliente = findViewById(R.id.tvNombreCliente);
         tvDomicilio = findViewById(R.id.tvDomicilio);
         tvEdad = findViewById(R.id.tvEdad);
@@ -60,6 +63,7 @@ public class DetalleRegistroActivity extends AppCompatActivity {
             return;
         }
 
+
         // Inicializar la referencia de la base de datos después de obtener el ID
         databaseReference = FirebaseDatabase.getInstance().getReference("DatosDispositivos").child(dispositivoId);
 
@@ -76,6 +80,8 @@ public class DetalleRegistroActivity extends AppCompatActivity {
             tvMarca.setText("Marca del Telefono: " + marca);
             String price = intent.getStringExtra("Precio");
             tvPrecio.setText("Precio: " + price);
+            String interes = intent.getStringExtra("porcentajeInteres");
+            tvInteres.setText("Porcentaje de Interes" + interes);
             String nom = intent.getStringExtra("nombreCliente");
             tvNombreCliente.setText("Nombre del Cliente: " + nom);
             String domic = intent.getStringExtra("domicilio");
@@ -100,6 +106,7 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                 intent1.putExtra("IMEI", imei);
                 intent1.putExtra("marcaTelefono", marca);
                 intent1.putExtra("Precio", price);
+                intent1.putExtra("porcentajeInteres", interes);
                 intent1.putExtra("nombreCliente", nom);
                 intent1.putExtra("domicilio", domic);
                 intent1.putExtra("edad", ed);
@@ -110,7 +117,6 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                 intent1.putExtra("MontoTotal", monto);
                 startActivity(intent1);
             });
-
         } else {
             Toast.makeText(this, "No se recibieron datos", Toast.LENGTH_SHORT).show();
         }
@@ -133,6 +139,7 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                     String imei = snapshot.child("imei").getValue(String.class);
                     String marca = snapshot.child("marcaTelefono").getValue(String.class);
                     String precio = snapshot.child("precio").getValue(String.class);
+                    String interes = snapshot.child("porcentajeInteres").getValue(String.class);
                     String nombre = snapshot.child("nombreCliente").getValue(String.class);
                     String domicilio = snapshot.child("domicilio").getValue(String.class);
                     String edad = snapshot.child("edad").getValue(String.class);
@@ -146,6 +153,8 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                     tvIMEI.setText("IMEI: " + imei);
                     tvMarca.setText("Marca del Teléfono: " + marca);
                     tvPrecio.setText("Precio: " + precio);
+                    tvInteres.setText("Porcentaje de Interes: " + interes);
+                    tvInteres.setEnabled(false);  // Hace que no sea editable
                     tvNombreCliente.setText("Nombre del Cliente: " + nombre);
                     tvDomicilio.setText("Domicilio: " + domicilio);
                     tvEdad.setText("Edad: " + edad);

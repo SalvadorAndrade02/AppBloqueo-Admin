@@ -4,12 +4,13 @@ public class DispositivosRegistrados {
     //Datos del telefono
     private String dispositivoId, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad;
     private String fechaInicio, fechaFin, pagoSemanal, montoTotal, estado;
+    private String porcentajeInteres;
     private int totalSemanas;
 
     public DispositivosRegistrados() {
     }
 
-    public DispositivosRegistrados(String dispositivoId, String userId, String IMEI, String marcaTelefono, String precio, String nombreCliente, String domicilio, String edad, String fechaInicio, String fechaFin, String pagoSemanal, String montoTotal, String estado, int totalSemanas) {
+    public DispositivosRegistrados(String dispositivoId, String userId, String IMEI, String marcaTelefono, String precio, String nombreCliente, String domicilio, String edad, String fechaInicio, String fechaFin, String pagoSemanal, String montoTotal, String estado, String porcentajeInteres, int totalSemanas) {
         this.dispositivoId = dispositivoId;
         this.userId = userId;
         this.IMEI = IMEI;
@@ -23,6 +24,7 @@ public class DispositivosRegistrados {
         this.pagoSemanal = pagoSemanal;
         this.montoTotal = montoTotal;
         this.estado = estado;
+        this.porcentajeInteres = porcentajeInteres;
         this.totalSemanas = totalSemanas;
     }
 
@@ -136,6 +138,14 @@ public class DispositivosRegistrados {
 
     public void setTotalSemanas(int totalSemanas) {
         this.totalSemanas = totalSemanas;
+    }
+
+    public String getPorcentajeInteres() {
+        return porcentajeInteres;
+    }
+
+    public void setPorcentajeInteres(String porcentajeInteres) {
+        this.porcentajeInteres = porcentajeInteres;
     }
 }
 

@@ -36,6 +36,7 @@ import java.util.Locale;
 public class EditarRegistroActivity extends AppCompatActivity {
 
     EditText etIMEI, etPrecio, etNombre, etDomicilio, etEdad, etPagoSemanal, etMonto;
+    EditText etInteres;
     Button btnGuardar;
     TextView tvSemanasTotal;
     TextInputEditText etFechaInicio, etFechaFin;
@@ -53,6 +54,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
         etIMEI = findViewById(R.id.etEditarIMEI);
         spinnerMarca = findViewById(R.id.spinnerMarca);
         etPrecio = findViewById(R.id.etEditarPrecio);
+        etInteres = findViewById(R.id.tvInteres);
         etNombre = findViewById(R.id.etEditarNombre);
         etDomicilio = findViewById(R.id.etEditarDomicilio);
         etEdad = findViewById(R.id.etEditarEdad);
@@ -83,6 +85,8 @@ public class EditarRegistroActivity extends AppCompatActivity {
             }
         }
         String precio = getIntent().getStringExtra("Precio");
+        // Obtener el valor desde Firebase o el Bundle
+        String interes = getIntent().getStringExtra("porcentajeInteres");
         String nombre = getIntent().getStringExtra("nombreCliente");
         String domicilio = getIntent().getStringExtra("domicilio");
         String edad = getIntent().getStringExtra("edad");
@@ -96,6 +100,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
         etIMEI.setText(imei);
         spinnerMarca.setAdapter(adapter);
         etPrecio.setText(precio);
+        etInteres.setText(interes);
         etNombre.setText(nombre);
         etDomicilio.setText(domicilio);
         etEdad.setText(edad);
@@ -149,6 +154,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
         String nuevoImei = etIMEI.getText().toString().trim();
         String nuevoMarca = spinnerMarca.getSelectedItem().toString();
         String nuevoPrecio = etPrecio.getText().toString();
+        //String nuevoInteres = etInteres.getText().toString();
         String nuevoNombre = etNombre.getText().toString();
         String nuevoDomicilio = etDomicilio.getText().toString();
         String nuevoEdad = etEdad.getText().toString();
@@ -179,6 +185,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
                         datosActualizados.put("imei", nuevoImei);
                         datosActualizados.put("marcaTelefono", nuevoMarca);
                         datosActualizados.put("precio", nuevoPrecio);
+                        //datosActualizados.put("porcentajeInteres", nuevoInteres);
                         datosActualizados.put("nombreCliente", nuevoNombre);
                         datosActualizados.put("domicilio", nuevoDomicilio);
                         datosActualizados.put("edad", nuevoEdad);

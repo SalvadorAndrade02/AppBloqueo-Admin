@@ -56,6 +56,15 @@
             android:inputType="numberDecimal"
             android:padding="8dp" />
 
+        <EditText
+            android:id="@+id/tvInteres"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:focusable="false"
+            android:clickable="false"
+            android:text="Intereses: " />
+
         <!-- Campo para datos del Cliente -->
         <TextView
             android:layout_width="match_parent"

@@ -5,9 +5,12 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +42,7 @@ public class AgregarFragment extends Fragment {
     EditText etIMEI, etPrecio, etNombreCliente, etDomicilio, etEdad, etPagoSemanal, etMontoTotal;
     Button btnGuardar;
     private TextInputEditText etFechaInicio, etFechaFin;
+    Spinner spinnerInteres;
     private TextView tvTotalSemanas;
     private Calendar fechaInicio, fechaFin;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -101,6 +105,8 @@ public class AgregarFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMarca.setAdapter(adapter);
 
+        spinnerInteres = view.findViewById(R.id.spinnerInteres);
+
         etNombreCliente = view.findViewById(R.id.etNombreCliente);
         etDomicilio = view.findViewById(R.id.etDomicilio);
         etEdad = view.findViewById(R.id.etEdad);
@@ -122,7 +128,74 @@ public class AgregarFragment extends Fragment {
 
         btnGuardar.setOnClickListener(v -> guardarDatos());
 
+        etMontoTotal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                calcularPagoSemanal();
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        tvTotalSemanas.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                calcularPagoSemanal();
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        etPrecio.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                calcularMontoTotal();
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        spinnerInteres.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                calcularMontoTotal();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         return view;
+    }
+    private void calcularPagoSemanal() {
+        String montoTotalStr = etMontoTotal.getText().toString().trim();
+        String semanasTotalStr = tvTotalSemanas.getText().toString().replaceAll("[^0-9]", "").trim(); // Extrae solo números
+
+        if (!montoTotalStr.isEmpty() && !semanasTotalStr.isEmpty()) {
+            try {
+                double montoTotal = Double.parseDouble(montoTotalStr);
+                int semanasTotal = Integer.parseInt(semanasTotalStr);
+
+                if (semanasTotal > 0) {
+                    double pagoSemanal = montoTotal / semanasTotal;
+                    etPagoSemanal.setText(String.format(Locale.getDefault(), "%.2f", pagoSemanal));
+                } else {
+                    etPagoSemanal.setText(""); // Evitar dividir entre 0
+                }
+            } catch (NumberFormatException e) {
+                etPagoSemanal.setText(""); // Manejo de error si hay valores inválidos
+            }
+        }
     }
 
     private void seleccionarFecha(TextInputEditText editText, Calendar fecha, boolean esInicio) {
@@ -138,6 +211,25 @@ public class AgregarFragment extends Fragment {
                 },
                 fecha.get(Calendar.YEAR), fecha.get(Calendar.MONTH), fecha.get(Calendar.DAY_OF_MONTH));
         datePicker.show();
+    }
+
+    private void calcularMontoTotal() {
+        String precioStr = etPrecio.getText().toString();
+        if (!precioStr.isEmpty()) {
+            double precio = Double.parseDouble(precioStr);
+
+            // Obtener la opción seleccionada
+            String interesSeleccionado = spinnerInteres.getSelectedItem().toString();
+
+            double montoTotal = precio; // Por defecto, el monto total es igual al precio
+
+            if (!interesSeleccionado.equals("Sin interés")) {
+                int porcentaje = Integer.parseInt(interesSeleccionado.replace("%", ""));
+                montoTotal = precio + (precio * porcentaje / 100);
+            }
+
+            etMontoTotal.setText(String.valueOf(montoTotal));
+        }
     }
 
     private void calcularSemanas() {
@@ -176,6 +268,11 @@ public class AgregarFragment extends Fragment {
         String fechaInicio = etFechaInicio.getText().toString();
         String fechaFin = etFechaFin.getText().toString();
         String pagoSemanal = etPagoSemanal.getText().toString();
+        // Obtener el interes
+        String porcentajeInteres = spinnerInteres.getSelectedItem().toString();
+        if (porcentajeInteres.equals("Sin interés")) {
+            porcentajeInteres = "0%"; // Guarda 0% para indicar que no se aplicó interés
+        }
         // Obtén las semanas calculadas
         int totalSemanas = Integer.parseInt(tvTotalSemanas.getText().toString()); // Convertir el texto a int
         String montoTotal = etMontoTotal.getText().toString();
@@ -186,7 +283,7 @@ public class AgregarFragment extends Fragment {
         }
         if (!marcaTelefono.isEmpty() && !Precio.isEmpty() && !nombreCliente.isEmpty() && !domicilio.isEmpty() && !edad.isEmpty() && !fechaInicio.isEmpty() && !pagoSemanal.isEmpty() && !montoTotal.isEmpty()) {
             String id = databaseReference.push().getKey();
-            DispositivosRegistrados dispositivos = new DispositivosRegistrados(id, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad, fechaInicio,fechaFin, pagoSemanal, montoTotal, "activo", totalSemanas);
+            DispositivosRegistrados dispositivos = new DispositivosRegistrados(id, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad, fechaInicio,fechaFin, pagoSemanal, montoTotal, "activo", porcentajeInteres, totalSemanas);
             databaseReference.child(id).setValue(dispositivos);
 
             // Mostrar un mensaje de éxito
