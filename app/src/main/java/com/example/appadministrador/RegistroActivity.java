@@ -23,7 +23,7 @@ import java.util.Map;
 public class RegistroActivity extends AppCompatActivity {
 
     private EditText etNombre, etCorreo, etContrasena, etConfirmarContrasena;
-    private Button btnRegistrar;
+    private Button btnRegistrar, btnCancelar;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     @Override
@@ -36,6 +36,14 @@ public class RegistroActivity extends AppCompatActivity {
         etContrasena = findViewById(R.id.etContrasena);
         etConfirmarContrasena = findViewById(R.id.etConfirmarContrasena);
         btnRegistrar = findViewById(R.id.btnRegistrar);
+        btnCancelar = findViewById(R.id.btnCancelar);
+
+        btnCancelar.setOnClickListener(v -> {
+            Intent intent = new Intent(RegistroActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            }
+        );
 
         btnRegistrar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();

@@ -9,10 +9,10 @@
     android:gravity="center">
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:id="@+id/imageView4"
+        android:layout_width="202dp"
+        android:layout_height="174dp"
+        app:srcCompat="@drawable/logo" />
 
     <TextView
         android:layout_width="match_parent"

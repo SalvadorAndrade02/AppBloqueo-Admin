@@ -46,7 +46,7 @@
     <Button
         android:id="@+id/btnRegistrar"
         android:layout_marginTop="10dp"
-        android:backgroundTint="@color/green"
+        android:backgroundTint="@color/verdecito"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Registrarse" />
@@ -54,7 +54,7 @@
     <Button
         android:id="@+id/btnCancelar"
         android:layout_marginTop="10dp"
-        android:backgroundTint="@color/red"
+        android:backgroundTint="@color/rojo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancelar" />
