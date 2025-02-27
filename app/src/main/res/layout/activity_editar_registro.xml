@@ -60,10 +60,10 @@
             android:id="@+id/tvInteres"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
+            android:text=""
+            android:enabled="false"
             android:focusable="false"
-            android:clickable="false"
-            android:text="Intereses: " />
+            android:clickable="false"/>
 
         <!-- Campo para datos del Cliente -->
         <TextView
@@ -147,6 +147,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Ingrese el pago semanal"
+
             android:inputType="number"
             android:padding="8dp" />
 
@@ -170,10 +171,11 @@
 
         <EditText
             android:id="@+id/etEditarMonto"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Ingrese el monto total"
-            android:inputType="number"
+            android:hint="Monto total: 0"
+
+            android:textSize="18sp"
             android:padding="8dp" />
 
         <!-- Botón para Guardar Cambios -->

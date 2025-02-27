@@ -9,14 +9,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.ViewHolder> {
     private List<DispositivosRegistrados> listaDispositivos;
+    private List<DispositivosRegistrados> listaFiltrada;
     private Context context;
 
     public RegistroAdapter(List<DispositivosRegistrados> listaRegistros, Context context) {
         this.listaDispositivos = listaRegistros;
+        this.listaFiltrada = new ArrayList<>(listaRegistros);
         this.context = context;
     }
 
@@ -65,6 +69,28 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.ViewHo
     public int getItemCount() {
         return listaDispositivos.size();
     }
+
+    public void filtrar(String texto) {
+        listaFiltrada.clear();
+        if (texto.isEmpty()) {
+            listaFiltrada.addAll(listaDispositivos);
+        } else {
+            texto = texto.toLowerCase();
+            for (DispositivosRegistrados registro : listaDispositivos) {
+                if (registro.getNombreCliente().toLowerCase().contains(texto) ||
+                        registro.getMarcaTelefono().toLowerCase().contains(texto) ||
+                        registro.getEstado().toLowerCase().contains(texto)) {
+                    listaFiltrada.add(registro);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+    public void filtrarLista(List<DispositivosRegistrados> listaFiltrada) {
+        this.listaDispositivos = new ArrayList<>(listaFiltrada); // Guardamos la lista filtrada
+        notifyDataSetChanged(); // Refrescamos la vista
+    }
+
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombreCliente, tvMarca;

@@ -15,6 +15,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import androidx.appcompat.widget.SearchView;
+
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -37,6 +40,8 @@ public class InicioFragment extends Fragment {
     RecyclerView recyclerView;
     RegistroAdapter adapter;
     List<DispositivosRegistrados> listaDispositivos;
+    TextView tvMensaje;
+    //private SearchView searchView;
     DatabaseReference databaseReference;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -88,17 +93,58 @@ public class InicioFragment extends Fragment {
 
         // Configurar Views
         recyclerView = view.findViewById(R.id.recyclerView);
+        tvMensaje = view.findViewById(R.id.tvMensaje);
+
+        androidx.appcompat.widget.SearchView searchView = view.findViewById(R.id.searchView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         listaDispositivos = new ArrayList<>();
         adapter = new RegistroAdapter(listaDispositivos, getActivity());
         recyclerView.setAdapter(adapter);
+        actualizarMensaje(); // Verificar si hay registros
 
         // Conectar con Firebase
         databaseReference = FirebaseDatabase.getInstance().getReference("DatosDispositivos");
         cargarDatos();
 
+        // Configurar el SearchView para filtrar la lista
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filtrarLista(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filtrarLista(newText);
+                return false;
+            }
+        });
         return view;
+    }
+
+    private void filtrarLista(String texto) {
+        List<DispositivosRegistrados> listaFiltrada = new ArrayList<>();
+
+        for (DispositivosRegistrados item : listaDispositivos) {
+            if (item.getNombreCliente().toLowerCase().contains(texto.toLowerCase()) ||
+                    item.getMarcaTelefono().toLowerCase().contains(texto.toLowerCase()) ||
+                    item.getEstado().toLowerCase().contains(texto.toLowerCase())) {
+
+                listaFiltrada.add(item);
+            }
+        }
+
+        adapter.filtrarLista(listaFiltrada);
+        actualizarMensaje(); // Verificar si hay registros después de filtrar
+    }
+    private void actualizarMensaje() {
+        if (adapter.getItemCount() == 0) {
+            tvMensaje.setVisibility(View.VISIBLE);
+        } else {
+            tvMensaje.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void cargarDatos() {
@@ -117,6 +163,7 @@ public class InicioFragment extends Fragment {
                     listaDispositivos.add(DatosDispositivos);
                 }
                 adapter.notifyDataSetChanged();
+                actualizarMensaje();
             }
 
             @Override

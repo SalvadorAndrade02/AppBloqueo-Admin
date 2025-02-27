@@ -204,12 +204,36 @@ public class AgregarFragment extends Fragment {
                     fecha.set(year, month, dayOfMonth);
                     editText.setText(dateFormat.format(fecha.getTime()));
 
+                    // Si la fecha seleccionada no es de inicio y la de inicio ya está seleccionada
                     if (!esInicio && !etFechaInicio.getText().toString().isEmpty()) {
-                        // Cuando se seleccione la fecha de fin, calculamos las semanas
-                        calcularSemanas();
+                        // Convertimos las fechas de inicio y fin a tipo Date para compararlas
+                        try {
+                            Date fechaInicio = dateFormat.parse(etFechaInicio.getText().toString());
+                            Date fechaFin = fecha.getTime();
+
+                            // Verificamos que la fecha de fin no sea anterior a la de inicio
+                            if (fechaFin.before(fechaInicio)) {
+                                // Si la fecha de fin es anterior a la de inicio, mostramos un mensaje de error
+                                Toast.makeText(requireContext(), "Error, no puede seleccionar una fecha anterior", Toast.LENGTH_SHORT).show();
+                                // Limpiar la fecha de fin
+                                editText.setText("");
+                            } else {
+                                // Si la validación es correcta, calculamos las semanas
+                                calcularSemanas();
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            Toast.makeText(requireContext(), "Error al comparar las fechas", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    // Si es la fecha de inicio, no realizamos ninguna validación
+                    if (esInicio) {
+                        // Se puede realizar alguna acción si es la fecha de inicio, si es necesario
                     }
                 },
                 fecha.get(Calendar.YEAR), fecha.get(Calendar.MONTH), fecha.get(Calendar.DAY_OF_MONTH));
+
         datePicker.show();
     }
 
@@ -256,60 +280,67 @@ public class AgregarFragment extends Fragment {
 
 
     private void guardarDatos() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        String userId = auth.getCurrentUser().getUid();
+        try {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            String userId = auth.getCurrentUser().getUid();
 
-        String IMEI = etIMEI.getText().toString().trim();
-        String marcaTelefono = spinnerMarca.getSelectedItem().toString();
-        String Precio = etPrecio.getText().toString();
-        String nombreCliente = etNombreCliente.getText().toString();
-        String domicilio = etDomicilio.getText().toString();
-        String edad = etEdad.getText().toString();
-        String fechaInicio = etFechaInicio.getText().toString();
-        String fechaFin = etFechaFin.getText().toString();
-        String pagoSemanal = etPagoSemanal.getText().toString();
-        // Obtener el interes
-        String porcentajeInteres = spinnerInteres.getSelectedItem().toString();
-        if (porcentajeInteres.equals("Sin interés")) {
-            porcentajeInteres = "0%"; // Guarda 0% para indicar que no se aplicó interés
-        }
-        // Obtén las semanas calculadas
-        int totalSemanas = Integer.parseInt(tvTotalSemanas.getText().toString()); // Convertir el texto a int
-        String montoTotal = etMontoTotal.getText().toString();
+            String IMEI = etIMEI.getText().toString().trim();
+            String marcaTelefono = spinnerMarca.getSelectedItem().toString();
+            String Precio = etPrecio.getText().toString();
+            String nombreCliente = etNombreCliente.getText().toString();
+            String domicilio = etDomicilio.getText().toString();
+            String edad = etEdad.getText().toString();
+            String fechaInicio = etFechaInicio.getText().toString();
+            String fechaFin = etFechaFin.getText().toString();
+            String pagoSemanal = etPagoSemanal.getText().toString();
 
-        if (!esIMEIValido(IMEI)) {
-            Toast.makeText(requireContext(), "El IMEI debe tener 15 dígitos numéricos", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!marcaTelefono.isEmpty() && !Precio.isEmpty() && !nombreCliente.isEmpty() && !domicilio.isEmpty() && !edad.isEmpty() && !fechaInicio.isEmpty() && !pagoSemanal.isEmpty() && !montoTotal.isEmpty()) {
-            String id = databaseReference.push().getKey();
-            DispositivosRegistrados dispositivos = new DispositivosRegistrados(id, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad, fechaInicio,fechaFin, pagoSemanal, montoTotal, "activo", porcentajeInteres, totalSemanas);
-            databaseReference.child(id).setValue(dispositivos);
+            // Obtener el interes
+            String porcentajeInteres = spinnerInteres.getSelectedItem().toString();
+            if (porcentajeInteres.equals("Sin interés")) {
+                porcentajeInteres = "0%"; // Guarda 0% para indicar que no se aplicó interés
+            }
 
-            // Mostrar un mensaje de éxito
-            Toast.makeText(getActivity(), "Datos guardados exitosamente", Toast.LENGTH_SHORT).show();
+            // Obtén las semanas calculadas
+            int totalSemanas = Integer.parseInt(tvTotalSemanas.getText().toString()); // Convertir el texto a int
+            String montoTotal = etMontoTotal.getText().toString();
 
-            // Limpiar los campos del formulario
-            etIMEI.setText("");
-            etPrecio.setText("");
-            etNombreCliente.setText("");
-            etDomicilio.setText("");
-            etEdad.setText("");
-            etFechaInicio.setText("");
-            etFechaFin.setText("");
-            etPagoSemanal.setText("");
-            tvTotalSemanas.setText("");  // Limpiar el campo de semanas
-            etMontoTotal.setText("");
+            if (!esIMEIValido(IMEI)) {
+                Toast.makeText(requireContext(), "El IMEI debe tener 15 dígitos numéricos", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Volver al fragmento de inicio con commit()
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new InicioFragment()) // Reemplaza el fragmento actual
-                    .commit(); // Asegúrate de llamar a commit para que la transacción se complete
-        } else {
+            if (!marcaTelefono.isEmpty() && !Precio.isEmpty() && !nombreCliente.isEmpty() && !domicilio.isEmpty() && !edad.isEmpty() && !fechaInicio.isEmpty() && !pagoSemanal.isEmpty() && !montoTotal.isEmpty()) {
+                String id = databaseReference.push().getKey();
+                DispositivosRegistrados dispositivos = new DispositivosRegistrados(id, userId, IMEI, marcaTelefono, Precio, nombreCliente, domicilio, edad, fechaInicio, fechaFin, pagoSemanal, montoTotal, "activo", porcentajeInteres, totalSemanas);
+                databaseReference.child(id).setValue(dispositivos);
+
+                // Mostrar un mensaje de éxito
+                Toast.makeText(getActivity(), "Datos guardados exitosamente", Toast.LENGTH_SHORT).show();
+
+                // Limpiar los campos del formulario
+                etIMEI.setText("");
+                etPrecio.setText("");
+                etNombreCliente.setText("");
+                etDomicilio.setText("");
+                etEdad.setText("");
+                etFechaInicio.setText("");
+                etFechaFin.setText("");
+                etPagoSemanal.setText("");
+                tvTotalSemanas.setText("");
+                etMontoTotal.setText("");
+
+                // Volver al fragmento de inicio con commit()
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new InicioFragment()) // Reemplaza el fragmento actual
+                        .commit(); // Asegúrate de llamar a commit para que la transacción se complete
+            } else {
+                Toast.makeText(getActivity(), "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();  // Esto imprimirá la excepción en el log
             Toast.makeText(getActivity(), "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 
     private boolean esIMEIValido(String imei) {

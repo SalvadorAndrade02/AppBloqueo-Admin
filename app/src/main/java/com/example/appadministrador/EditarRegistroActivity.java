@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,6 +47,8 @@ public class EditarRegistroActivity extends AppCompatActivity {
     String[] opcionesMarca = {"Samsung", "Motorola"};
     DatabaseReference databaseReference;
     String imei;
+    private int porcentajeInteres; // Variable global
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
         tvSemanasTotal = findViewById(R.id.tvTotalSemanas);
         etMonto = findViewById(R.id.etEditarMonto);
         btnGuardar = findViewById(R.id.btnGuardarEdicion);
+
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, opcionesMarca);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -86,7 +92,20 @@ public class EditarRegistroActivity extends AppCompatActivity {
         }
         String precio = getIntent().getStringExtra("Precio");
         // Obtener el valor desde Firebase o el Bundle
-        String interes = getIntent().getStringExtra("porcentajeInteres");
+        String inter = getIntent().getStringExtra("porcentajeInteres");
+        if (inter != null && !inter.isEmpty()) {
+            // Asumamos que viene como "10%" o "10"
+            String interNumeric = inter.replace("%", "").trim();
+            try {
+                porcentajeInteres = Integer.parseInt(interNumeric);
+            } catch (NumberFormatException e) {
+                porcentajeInteres = 0;
+            }
+        } else {
+            porcentajeInteres = 0;
+        }
+
+        etInteres.setText(porcentajeInteres + "%"); // Muestra el valor en el TextView
         String nombre = getIntent().getStringExtra("nombreCliente");
         String domicilio = getIntent().getStringExtra("domicilio");
         String edad = getIntent().getStringExtra("edad");
@@ -96,11 +115,12 @@ public class EditarRegistroActivity extends AppCompatActivity {
         int totalSemanas = getIntent().getIntExtra("totalSemanas", 0);
         String monto = getIntent().getStringExtra("MontoTotal");
 
+
         // Mostrar datos en los EditText
         etIMEI.setText(imei);
         spinnerMarca.setAdapter(adapter);
-        etPrecio.setText(precio);
-        etInteres.setText(interes);
+        etPrecio.setText(String.valueOf(precio));
+        etInteres.setText(inter + "%"); // Mostramos el interés como texto
         etNombre.setText(nombre);
         etDomicilio.setText(domicilio);
         etEdad.setText(edad);
@@ -110,9 +130,23 @@ public class EditarRegistroActivity extends AppCompatActivity {
         tvSemanasTotal.setText(String.valueOf(totalSemanas));
         etMonto.setText(monto);
 
+        actualizarMontoTotal(); // Recalcula el monto total al abrir la pantalla
+
         btnGuardar.setOnClickListener(v -> guardarCambios());
         etFechaInicio.setOnClickListener(v -> seleccionarFecha(etFechaInicio, true));
         etFechaFin.setOnClickListener(v -> seleccionarFecha(etFechaFin, false));
+
+        etPrecio.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                actualizarMontoTotal(); // Este método ya actualiza etMonto
+                actualizarPagoSemanal(); // Nuevo: actualiza el pago semanal
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
     }
 
     private void seleccionarFecha(TextInputEditText editText, boolean esInicio) {
@@ -124,6 +158,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
 
             if (!etFechaInicio.getText().toString().isEmpty() && !etFechaFin.getText().toString().isEmpty()) {
                 calcularSemanas();
+                actualizarPagoSemanal(); // Actualiza el pago semanal después de recalcular las semanas
             }
         }, fecha.get(Calendar.YEAR), fecha.get(Calendar.MONTH), fecha.get(Calendar.DAY_OF_MONTH));
         datePicker.show();
@@ -145,6 +180,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
     }
 
     private void guardarCambios() {
+
         String dispositivoId  = getIntent().getStringExtra("id");
         if (dispositivoId == null || dispositivoId.isEmpty()) {
             Toast.makeText(this, "Error: No se encontró el ID del registro", Toast.LENGTH_SHORT).show();
@@ -154,7 +190,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
         String nuevoImei = etIMEI.getText().toString().trim();
         String nuevoMarca = spinnerMarca.getSelectedItem().toString();
         String nuevoPrecio = etPrecio.getText().toString();
-        //String nuevoInteres = etInteres.getText().toString();
+        String nuevoInteres = etInteres.getText().toString().trim();
         String nuevoNombre = etNombre.getText().toString();
         String nuevoDomicilio = etDomicilio.getText().toString();
         String nuevoEdad = etEdad.getText().toString();
@@ -163,6 +199,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
         String nuevoPagoseman = etPagoSemanal.getText().toString();
         int nuevasSemanasTotal = Integer.parseInt(tvSemanasTotal.getText().toString());
         String nuevoMonto = etMonto.getText().toString();
+
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("DatosDispositivos").child(dispositivoId);
         if (!esIMEIValido(nuevoImei)) {
@@ -185,7 +222,7 @@ public class EditarRegistroActivity extends AppCompatActivity {
                         datosActualizados.put("imei", nuevoImei);
                         datosActualizados.put("marcaTelefono", nuevoMarca);
                         datosActualizados.put("precio", nuevoPrecio);
-                        //datosActualizados.put("porcentajeInteres", nuevoInteres);
+                        datosActualizados.put("porcentajeInteres", nuevoInteres);
                         datosActualizados.put("nombreCliente", nuevoNombre);
                         datosActualizados.put("domicilio", nuevoDomicilio);
                         datosActualizados.put("edad", nuevoEdad);
@@ -227,5 +264,45 @@ public class EditarRegistroActivity extends AppCompatActivity {
     private boolean esIMEIValido(String imei) {
         return imei.matches("\\d{15}"); // Expresión regular: 15 dígitos numéricos
     }
+    private void actualizarMontoTotal() {
+        String precioStr = etPrecio.getText().toString();
+        if (!precioStr.isEmpty()) {
+            try {
+                double precio = Double.parseDouble(precioStr);
+                // Calcula el total usando el porcentaje global
+                double total = precio + (precio * (porcentajeInteres / 100.0));
+                etMonto.setText(String.format(Locale.getDefault(), "%.2f", total));
+            } catch (NumberFormatException e) {
+                etMonto.setText("0.00");
+            }
+        } else {
+            etMonto.setText("0.00");
+        }
+    }
+
+    private void actualizarPagoSemanal() {
+        // Extraer el monto total
+        String montoTotalStr = etMonto.getText().toString().trim();
+        // Extraer las semanas totales; si tvSemanasTotal contiene solo el número, se puede convertir directamente
+        String semanasTotalStr = tvSemanasTotal.getText().toString().trim();
+
+        if (!montoTotalStr.isEmpty() && !semanasTotalStr.isEmpty()) {
+            try {
+                double montoTotal = Double.parseDouble(montoTotalStr);
+                int totalSemanas = Integer.parseInt(semanasTotalStr);
+                if (totalSemanas > 0) {
+                    double pagoSemanal = montoTotal / totalSemanas;
+                    etPagoSemanal.setText(String.format(Locale.getDefault(), "%.2f", pagoSemanal));
+                } else {
+                    etPagoSemanal.setText("0.00");
+                }
+            } catch (NumberFormatException e) {
+                etPagoSemanal.setText("0.00");
+            }
+        } else {
+            etPagoSemanal.setText("0.00");
+        }
+    }
+
 
 }

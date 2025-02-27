@@ -80,8 +80,11 @@ public class DetalleRegistroActivity extends AppCompatActivity {
             tvMarca.setText("Marca del Telefono: " + marca);
             String price = intent.getStringExtra("Precio");
             tvPrecio.setText("Precio: " + price);
-            String interes = intent.getStringExtra("porcentajeInteres");
-            tvInteres.setText("Porcentaje de Interes" + interes);
+
+            String inter = getIntent().getStringExtra("porcentajeInteres");
+            Log.d("DEBUG", "Valor recibido de porcentajeInteres: " + inter);
+            tvInteres.setText("Porcentaje de Interes: " + inter);
+
             String nom = intent.getStringExtra("nombreCliente");
             tvNombreCliente.setText("Nombre del Cliente: " + nom);
             String domic = intent.getStringExtra("domicilio");
@@ -106,14 +109,15 @@ public class DetalleRegistroActivity extends AppCompatActivity {
                 intent1.putExtra("IMEI", imei);
                 intent1.putExtra("marcaTelefono", marca);
                 intent1.putExtra("Precio", price);
-                intent1.putExtra("porcentajeInteres", interes);
+                String interText = tvInteres.getText().toString().replace("Porcentaje de Interes: ", "").replace("%", "").trim();
+                intent1.putExtra("porcentajeInteres", interText);
                 intent1.putExtra("nombreCliente", nom);
                 intent1.putExtra("domicilio", domic);
                 intent1.putExtra("edad", ed);
                 intent1.putExtra("fechaInicio", fechaIni);
                 intent1.putExtra("fechaFin", fechaFin);
                 intent1.putExtra("PagoSemanal", pagoSem);
-                intent1.putExtra("totalSemanas", semTotal);
+                intent1.putExtra("totalSemanas", semTotal > 0 ? semTotal : 0);
                 intent1.putExtra("MontoTotal", monto);
                 startActivity(intent1);
             });

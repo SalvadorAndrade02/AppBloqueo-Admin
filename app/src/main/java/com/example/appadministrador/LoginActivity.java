@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
                         navegarAlCRUD();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Error al iniciar sesión", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Error al iniciar sesión, los datos son incorrectos", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

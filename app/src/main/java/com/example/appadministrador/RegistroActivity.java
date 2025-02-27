@@ -95,7 +95,7 @@ public class RegistroActivity extends AppCompatActivity {
                                     });
                         } else {
                             Log.e("Registro", "Error en el registro: " + task.getException().getMessage());
-                            Toast.makeText(RegistroActivity.this, "Error en el registro: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegistroActivity.this, "Error en el registro, datos no guardados correctamente: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
         });
